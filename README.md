@@ -1,4 +1,4 @@
 server
 ======
 
-AIoTA Response Processing Worker
+AIoTA Response Processing Process

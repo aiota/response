@@ -24,7 +24,14 @@ function handleResponseRequest(db, msg, callback)
 					type: { type: "string", enum: [ "ack", "nack" ], required: true },
 					timestamp: { type: "integer", minimum: 0, required: true },
 					ttl: { type: "integer", minimum: 0, required: true },
-					tokencardId: { type: "string", required: true },
+					encryption: {
+						type: "object",
+						properties: {
+							method: { type: "string", required: true },
+							tokencardId: { type: "string", required: true }
+						},
+						required: true
+					}
 				},
 				required: true
 			},
@@ -61,7 +68,7 @@ function handleResponseRequest(db, msg, callback)
 				upd["$set"] = { status: (msg.header.type == "ack" ? (progress >= 100 ? 20 : 10) : 90) };
 				upd["$push"] = { progress: { timestamp: msg.header.timestamp, status: (msg.header.type == "ack" ? (progress >= 100 ? "completed" : "progress " + progress + "%") : "failed") } };
 	
-				collection.update({ deviceId: msg.header.deviceId, appId: msg.header.tokencardId, requestId: msg.body.requestId }, upd, function(err, result) {
+				collection.update({ deviceId: msg.header.deviceId, "encryption.tokencardId": msg.header.tokencardId, requestId: msg.body.requestId }, upd, function(err, result) {
 					callback(err ? { error: err } : { status: "OK" });
 				});
 			});
