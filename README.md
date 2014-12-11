@@ -1,4 +1,4 @@
 server
 ======
 
-AIoTA Response Processing Process
+AiotA Response Processing Process
