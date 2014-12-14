@@ -68,7 +68,7 @@ function handleResponseRequest(db, msg, callback)
 				upd["$set"] = { status: (msg.header.type == "ack" ? (progress >= 100 ? 20 : 10) : 90) };
 				upd["$push"] = { progress: { timestamp: msg.header.timestamp, status: (msg.header.type == "ack" ? (progress >= 100 ? "completed" : "progress " + progress + "%") : "failed") } };
 	
-				collection.update({ deviceId: msg.header.deviceId, "encryption.tokencardId": msg.header.tokencardId, requestId: msg.body.requestId }, upd, function(err, result) {
+				collection.update({ deviceId: msg.header.deviceId, "encryption.tokencardId": msg.header.encryption.tokencardId, requestId: msg.body.requestId }, upd, function(err, result) {
 					callback(err ? { error: err } : { status: "OK" });
 				});
 			});
