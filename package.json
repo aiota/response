@@ -1,6 +1,6 @@
 {
 	"name": "aiota-response",
-	"version": "0.0.8",
+	"version": "0.0.9",
 	"description": "AiotA Response Message Micro Process",
 	"main": "response.js",
 	"repository": {
