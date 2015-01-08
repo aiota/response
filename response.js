@@ -57,37 +57,21 @@ function handleResponseRequest(db, msg, callback)
 			callback({ error: "This message has expired.", errorCode: 100017 });
 		}
 		else {
-			db.collection("push_actions", function(err, collection) {
+			db.collection("actions", function(err, collection) {
 				if (err) {
 					callback({ error: err });
 					return;
 				}
 					
 				var progress = (msg.header.type == "ack" ? (msg.body.hasOwnProperty("progress") ? msg.body.progress : 0) : 0);
+				var reason = (msg.header.type == "nack" ? (msg.body.hasOwnProperty("reason") ? msg.body.reason : "") : "");
 
 				var upd = {};
 				upd["$set"] = { status: (msg.header.type == "ack" ? (progress >= 100 ? 20 : 10) : 90) };
+				upd["$push"] = { progress: { timestamp: msg.header.timestamp, status: (msg.header.type == "ack" ? (progress >= 100 ? "completed" : "progress " + progress + "%") : "failed") } };
 	
 				collection.update({ deviceId: msg.header.deviceId, "encryption.tokencardId": msg.header.encryption.tokencardId, requestId: msg.body.requestId }, upd, function(err, result) {
-					if (err) {
-						callback({ error: err });
-						return;
-					}
-
-					db.collection("actions", function(err, collection) {
-						if (err) {
-							callback({ error: err });
-							return;
-						}
-			
-						var reason = (msg.header.type == "nack" ? (msg.body.hasOwnProperty("reason") ? msg.body.reason : "") : "");
-						
-						upd["$push"] = { progress: { timestamp: msg.header.timestamp, status: (msg.header.type == "ack" ? (progress >= 100 ? "completed" : "progress " + progress + "%") : "failed") } };
-			
-						collection.update({ deviceId: msg.header.deviceId, "encryption.tokencardId": msg.header.encryption.tokencardId, requestId: msg.body.requestId }, upd, function(err, result) {
-							callback(err ? { error: err } : { status: "OK" });
-						});
-					});
+					callback(err ? { error: err } : { status: "OK" });
 				});
 			});
 		}
